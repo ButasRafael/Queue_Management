@@ -22,7 +22,6 @@ public class Server implements Runnable {
         this.maxTasksPerServer = maxTasksPerServer;
     }
     public void addTask(Task task) {
-        // Attempt to add task to the queue
         boolean added = tasks.offer(task);
         if (added &&tasks.size()<=maxTasksPerServer) {
             waitingPeriod.addAndGet(task.getServiceTime());
@@ -50,9 +49,6 @@ public class Server implements Runnable {
             System.err.println("Server thread interrupted: " + e.getMessage());
         }
     }
-
-
-
 
 
     public Task[] getTasks() {

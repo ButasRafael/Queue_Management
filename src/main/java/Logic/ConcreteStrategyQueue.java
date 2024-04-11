@@ -10,7 +10,6 @@ public class ConcreteStrategyQueue implements Strategy {
     public void addTask(List<Server> servers, Task t) {
         int index = 0;
         int comp = servers.get(0).getQueueSize();
-        //Server shortestQueueServer = servers.get(0);
         for (Server server : servers) {
             if (server.getQueueSize() < comp) {
                 index = servers.indexOf(server);

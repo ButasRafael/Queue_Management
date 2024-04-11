@@ -34,7 +34,7 @@ public class TextFile {
 
         for (int i = 0; i < servers.size(); i++) {
             Server server = servers.get(i);
-            logStream.println("Queue " + (i + 1) + ": " + formatQueue(server) + server.getWaitingPeriod());
+            logStream.println("Queue " + (i + 1) + ": " + formatQueue(server));
         }
 
         logStream.println("--------------------------------------");

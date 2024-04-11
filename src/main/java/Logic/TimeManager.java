@@ -5,7 +5,7 @@ public class TimeManager implements Runnable {
     private int timeLimit;
 
     public TimeManager(int timeLimit) {
-        this.currentTime = 0;
+        this.currentTime = -1;
         this.timeLimit = timeLimit;
     }
 

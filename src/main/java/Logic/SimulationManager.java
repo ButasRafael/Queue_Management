@@ -7,11 +7,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class SimulationManager implements Runnable {
-    public int timeLimit = 20;
-    public int numberOfServers = 3;
-    public int numberOfClients = 10;
+    public int timeLimit = 60;
+    public int numberOfServers = 5;
+    public int numberOfClients = 50;
     public int minArrivalTime = 2;
-    public int maxArrivalTime = 10;
+    public int maxArrivalTime = 40;
     public int maxProcessingTime = 1;
     public int minProcessingTime = 7;
 
@@ -20,7 +20,7 @@ public class SimulationManager implements Runnable {
 
     private Scheduler scheduler;
     private TextFile file;
-    private final String logFileName = "simulation_log.txt";
+    private final String logFileName = "simulation_log_timeStrategy.txt";
     private List<Task> generatedTasks;
     private TimeManager timeManager;
     private List<Task> generatedTasksCopy;
@@ -29,6 +29,8 @@ public class SimulationManager implements Runnable {
 
     public SimulationManager() {
         timeManager = new TimeManager(timeLimit);
+        Thread timeManagerThread = new Thread(timeManager);
+        timeManagerThread.start();
         scheduler = new Scheduler(numberOfServers, 1000,timeManager);
         scheduler.changeStrategy(selectionPolicy);
         file = new TextFile(logFileName);
@@ -65,9 +67,9 @@ public class SimulationManager implements Runnable {
                 taskCount++;
             }
         }
-        // Check if there are processed tasks before computing the average
+
         if (taskCount == 0) {
-            return 0; // or any default value that makes sense in your context
+            return 0;
         }
         return (double) totalWaitingTime / taskCount;
     }
@@ -75,8 +77,6 @@ public class SimulationManager implements Runnable {
     @Override
     public void run() {
         try {
-            Thread timeThread = new Thread(timeManager);
-            timeThread.start();
             double avgServiceTime = calculateAverageServiceTime();
             int maxSum=0;
             int peakSecond=0;
