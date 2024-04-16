@@ -4,6 +4,7 @@ import Logic.TimeManager;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server implements Runnable {
@@ -11,12 +12,20 @@ public class Server implements Runnable {
     private final AtomicInteger waitingPeriod;
     private int maxTasksPerServer;
     private TimeManager timeManager;
+    private final AtomicBoolean isRunning;
+
+
 
     public Server(TimeManager timeManager) {
         this.tasks = new LinkedBlockingQueue<>();
         this.waitingPeriod = new AtomicInteger(0);
         this.timeManager=timeManager;
+        this.isRunning = new AtomicBoolean(true);
     }
+    public void stop() {
+        isRunning.set(false);
+    }
+
 
     public void setMaxTasksPerServer(int maxTasksPerServer) {
         this.maxTasksPerServer = maxTasksPerServer;
@@ -31,7 +40,7 @@ public class Server implements Runnable {
     @Override
     public void run() {
         try {
-            while (true) {
+            while (isRunning.get()) {
                 Task task = tasks.peek();
                 if (task != null && task.getServiceTime() > 0) {
                     task.setStartTime(timeManager.getCurrentTime());
@@ -39,8 +48,8 @@ public class Server implements Runnable {
                         Thread.sleep(1000);
                         task.decrementServiceTime();
                         waitingPeriod.decrementAndGet();
+                        task.incrementInitialServiceTime();
                     }
-
                     tasks.poll();
                 }
             }

@@ -12,7 +12,7 @@ public class TimeManager implements Runnable {
     @Override
     public void run() {
         try {
-            while (currentTime < timeLimit) {
+            while (currentTime <= timeLimit) {
                 currentTime++;
                 Thread.sleep(1000);
             }
@@ -26,6 +26,6 @@ public class TimeManager implements Runnable {
     }
 
     public boolean isTimeUp() {
-        return currentTime >= timeLimit;
+        return currentTime > timeLimit;
     }
 }

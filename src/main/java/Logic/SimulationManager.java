@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class SimulationManager implements Runnable {
-    public int timeLimit = 60;
-    public int numberOfServers = 5;
-    public int numberOfClients = 50;
-    public int minArrivalTime = 2;
-    public int maxArrivalTime = 40;
-    public int maxProcessingTime = 1;
-    public int minProcessingTime = 7;
+    public int timeLimit = 200;
+    public int numberOfServers = 20;
+    public int numberOfClients = 1000;
+    public int minArrivalTime = 10;
+    public int maxArrivalTime = 100;
+    public int maxProcessingTime = 3;
+    public int minProcessingTime = 9;
 
 
     public SelectionPolicy selectionPolicy = SelectionPolicy.SHORTEST_TIME ;
@@ -49,13 +49,23 @@ public class SimulationManager implements Runnable {
         Collections.sort(generatedTasks, (t1, t2) -> t1.getArrivalTime() - t2.getArrivalTime());
     }
 
-
     private double calculateAverageServiceTime() {
         int totalServiceTime = 0;
-        for (Task task : generatedTasks) {
-            totalServiceTime += task.getServiceTime();
+        int count = 0;
+        for (Task task : generatedTasksCopy) {
+            if (task.getStartTime() != -1) {
+                count++;
+                if (task.getStartTime() + task.getInitialServiceTime() <= timeLimit) {
+                    totalServiceTime += task.getInitialServiceTime();
+                } else {
+                    totalServiceTime += timeLimit - task.getStartTime();
+                }
+            }
         }
-        return (double) totalServiceTime / generatedTasks.size();
+        if (count == 0) {
+            return 0;
+        }
+        return (double) totalServiceTime / count;
     }
 
     public double computeAverageWaitingTime() {
@@ -64,6 +74,10 @@ public class SimulationManager implements Runnable {
         for (Task task : generatedTasksCopy) {
             if (task.getStartTime() != -1) {
                 totalWaitingTime += (task.getStartTime() - task.getArrivalTime());
+                taskCount++;
+            }
+            else if(task.getArrivalTime()<=timeLimit){
+                totalWaitingTime+=timeLimit-task.getArrivalTime();
                 taskCount++;
             }
         }
@@ -77,7 +91,6 @@ public class SimulationManager implements Runnable {
     @Override
     public void run() {
         try {
-            double avgServiceTime = calculateAverageServiceTime();
             int maxSum=0;
             int peakSecond=0;
             while (!timeManager.isTimeUp() && (!generatedTasks.isEmpty() || scheduler.hasTasksInService())) {
@@ -96,6 +109,7 @@ public class SimulationManager implements Runnable {
                 }
                 Thread.sleep(1000);
             }
+            double avgServiceTime = calculateAverageServiceTime();
             double avgWaitingTime=computeAverageWaitingTime();
             file.printSimulationEnd(avgWaitingTime,peakSecond,avgServiceTime);
 
@@ -103,12 +117,10 @@ public class SimulationManager implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
+            scheduler.stop();
             file.close();
-            System.exit(0);
         }
     }
-
-
 
 
     public static void main(String[] args) {

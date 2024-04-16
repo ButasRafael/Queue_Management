@@ -68,4 +68,9 @@ public class Scheduler {
         }
         return false;
     }
+    public void stop() {
+        for (Server server : servers) {
+            server.stop();
+        }
+    }
 }

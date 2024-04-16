@@ -5,12 +5,14 @@ public class Task {
     private int arrivalTime;
     private int serviceTime;
     private int startTime;
+    private int initialServiceTime;
 
     public Task(int id, int arrivalTime, int serviceTime) {
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.serviceTime = serviceTime;
         this.startTime=-1;
+        this.initialServiceTime=0;
     }
 
     public int getId() {
@@ -35,6 +37,13 @@ public class Task {
 
     public void setStartTime(int time) {
         this.startTime = time;
+    }
+    public void incrementInitialServiceTime() {
+        initialServiceTime++;
+    }
+
+    public int getInitialServiceTime() {
+        return initialServiceTime;
     }
 
 }
