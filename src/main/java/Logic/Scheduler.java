@@ -3,26 +3,13 @@ import Model.Server;
 import Model.Task;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Scheduler {
-    private List<Server> servers;
-    private int maxNoServers;
-    private int maxTasksPerServer;
+    private final List<Server> servers;
     private Strategy strategy;
-    private BlockingQueue<Task> taskQueue;
-    private AtomicInteger waitingPeriod;
-    private TimeManager timeManager;
 
     public Scheduler(int maxNoServers, int maxTasksPerServer,TimeManager timeManager) {
-        this.maxNoServers = maxNoServers;
-        this.maxTasksPerServer = maxTasksPerServer;
-        this.timeManager=timeManager;
         this.servers = new ArrayList<>();
-        this.taskQueue = new LinkedBlockingQueue<>();
-        this.waitingPeriod = new AtomicInteger(0);
         for (int i = 0; i < maxNoServers; i++) {
             Server server = new Server(timeManager);
             server.setMaxTasksPerServer(maxTasksPerServer);

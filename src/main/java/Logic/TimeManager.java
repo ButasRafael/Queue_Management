@@ -2,7 +2,7 @@ package Logic;
 
 public class TimeManager implements Runnable {
     private int currentTime;
-    private int timeLimit;
+    private final int timeLimit;
 
     public TimeManager(int timeLimit) {
         this.currentTime = -1;

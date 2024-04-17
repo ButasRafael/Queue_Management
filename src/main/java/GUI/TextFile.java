@@ -3,7 +3,6 @@ package GUI;
 import Model.Server;
 import Model.Task;
 
-import java.util.Arrays;
 import java.util.List;
 
 import java.io.FileOutputStream;
@@ -34,7 +33,7 @@ public class TextFile {
 
         for (int i = 0; i < servers.size(); i++) {
             Server server = servers.get(i);
-            logStream.println("Queue " + (i + 1) + ": " + formatQueue(server)+server.getWaitingPeriod());
+            logStream.println("Queue " + (i + 1) + ": " + formatQueue(server));
         }
 
         logStream.println("--------------------------------------");
@@ -45,9 +44,8 @@ public class TextFile {
             return "closed ";
         } else {
             StringBuilder builder = new StringBuilder();
-            List<Task> tasks = Arrays.asList(server.getTasks());
-            for (int i = 0; i < tasks.size(); i++) {
-                Task task = tasks.get(i);
+            Task[] tasks = server.getTasks();
+            for (Task task : tasks) {
                 builder.append("(").append(task.getId()).append(",").append(task.getArrivalTime()).append(",").append(task.getServiceTime());
                 builder.append("); ");
             }
@@ -63,9 +61,9 @@ public class TextFile {
     }
 
     public void printSimulationEnd(double averageWaitingTime, int peakHour, double averageServiceTime) {
+        logStream.println("Simulation ended.");
         logStream.println("Average waiting time: " + averageWaitingTime);
         logStream.println("Average service time: " + averageServiceTime);
         logStream.println("Peak hour: " + peakHour);
-        logStream.println("Simulation ended.");
     }
 }

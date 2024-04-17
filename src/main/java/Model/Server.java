@@ -11,7 +11,7 @@ public class Server implements Runnable {
     private final BlockingQueue<Task> tasks;
     private final AtomicInteger waitingPeriod;
     private int maxTasksPerServer;
-    private TimeManager timeManager;
+    private final TimeManager timeManager;
     private final AtomicBoolean isRunning;
 
 

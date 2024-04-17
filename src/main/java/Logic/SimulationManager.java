@@ -1,41 +1,59 @@
 package Logic;
 import GUI.TextFile;
 import Model.Task;
+import GUI.QueueEvolutionGUI;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class SimulationManager implements Runnable {
-    public int timeLimit = 200;
-    public int numberOfServers = 20;
-    public int numberOfClients = 1000;
-    public int minArrivalTime = 10;
-    public int maxArrivalTime = 100;
-    public int maxProcessingTime = 3;
-    public int minProcessingTime = 9;
+    public int timeLimit;
+    public int numberOfServers;
+    public int numberOfClients;
+    public int minArrivalTime;
+    public int maxArrivalTime;
+    public int maxProcessingTime;
+    public int minProcessingTime;
 
 
-    public SelectionPolicy selectionPolicy = SelectionPolicy.SHORTEST_TIME ;
+    public SelectionPolicy selectionPolicy;
 
-    private Scheduler scheduler;
-    private TextFile file;
-    private final String logFileName = "simulation_log_timeStrategy.txt";
+    private final Scheduler scheduler;
+    private final TextFile file;
     private List<Task> generatedTasks;
-    private TimeManager timeManager;
-    private List<Task> generatedTasksCopy;
+    private final TimeManager timeManager;
+    private final List<Task> generatedTasksCopy;
+    private final QueueEvolutionGUI queueEvolutionPanel;
 
 
 
-    public SimulationManager() {
+    public SimulationManager(int timeLimit, int numberOfServers, int numberOfClients,
+                             int minArrivalTime, int maxArrivalTime, int maxProcessingTime,
+                             int minProcessingTime, SelectionPolicy selectionPolicy) {
+        this.timeLimit = timeLimit;
+        this.numberOfServers = numberOfServers;
+        this.numberOfClients = numberOfClients;
+        this.minArrivalTime = minArrivalTime;
+        this.maxArrivalTime = maxArrivalTime;
+        this.maxProcessingTime = maxProcessingTime;
+        this.minProcessingTime = minProcessingTime;
+        this.selectionPolicy = selectionPolicy;
+        String logFileName;
+        if (selectionPolicy == SelectionPolicy.SHORTEST_QUEUE) {
+            logFileName = "simulation_log_queueStrategy.txt";
+        } else {
+            logFileName = "simulation_log_timeStrategy.txt";
+        }
         timeManager = new TimeManager(timeLimit);
         Thread timeManagerThread = new Thread(timeManager);
         timeManagerThread.start();
-        scheduler = new Scheduler(numberOfServers, 1000,timeManager);
+        scheduler = new Scheduler(numberOfServers, 10000,timeManager);
         scheduler.changeStrategy(selectionPolicy);
         file = new TextFile(logFileName);
         generateNRandomTasks();
         generatedTasksCopy = new ArrayList<>(generatedTasks);
+        queueEvolutionPanel = new QueueEvolutionGUI();
     }
 
     private void generateNRandomTasks() {
@@ -46,7 +64,7 @@ public class SimulationManager implements Runnable {
             Task task = new Task(i, arrivalTime, processingTime);
             generatedTasks.add(task);
         }
-        Collections.sort(generatedTasks, (t1, t2) -> t1.getArrivalTime() - t2.getArrivalTime());
+        generatedTasks.sort(Comparator.comparingInt(Task::getArrivalTime));
     }
 
     private double calculateAverageServiceTime() {
@@ -100,7 +118,7 @@ public class SimulationManager implements Runnable {
                         generatedTasks.remove(task);
                     }
                 }
-
+                queueEvolutionPanel.updateQueueEvolution(timeManager.getCurrentTime(), scheduler.getServers(), generatedTasks);
                 file.update(timeManager.getCurrentTime(), scheduler.getServers(), generatedTasks);
                 int maxSum2 = maxSum;
                 maxSum=scheduler.computeMaxSum(maxSum);
@@ -112,6 +130,7 @@ public class SimulationManager implements Runnable {
             double avgServiceTime = calculateAverageServiceTime();
             double avgWaitingTime=computeAverageWaitingTime();
             file.printSimulationEnd(avgWaitingTime,peakSecond,avgServiceTime);
+            queueEvolutionPanel.displayEndDetails(avgWaitingTime, peakSecond, avgServiceTime);
 
 
         } catch (InterruptedException e) {
@@ -122,10 +141,4 @@ public class SimulationManager implements Runnable {
         }
     }
 
-
-    public static void main(String[] args) {
-        SimulationManager simulationManager = new SimulationManager();
-        Thread t = new Thread(simulationManager);
-        t.start();
-    }
 }

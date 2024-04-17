@@ -1,8 +1,8 @@
 package Model;
 
 public class Task {
-    private int id;
-    private int arrivalTime;
+    private final int id;
+    private final int arrivalTime;
     private int serviceTime;
     private int startTime;
     private int initialServiceTime;
